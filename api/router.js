@@ -45,10 +45,9 @@ router.get("/users", (req, res) => {
 })
 
 router.post("/login", (req, res) => {
-    const credentials = req.body;
-    const {username, password} = credentials;
+    const {username, password} = req.body;
 
-    if (isValid(credentials)){
+    if (isValid(req.body)){
         db("users").where({ username }).first()
     .then(user => {
         console.log(user);
