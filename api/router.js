@@ -44,4 +44,30 @@ router.get("/users", (req, res) => {
     })
 })
 
+router.post("/login", (req, res) => {
+    const credentials = req.body;
+    const {username, password} = credentials;
+
+    if (isValid(credentials)){
+        db("users").where({ username }).first()
+    .then(user => {
+        console.log(user);
+        if (user && bcryptjs.compareSync(password, user.password)) {
+            res.status(200).json({ message: `Welcome ${user.username}!` });
+          } else {
+            res.status(401).json({ message: 'Invalid Credentials' });
+          }
+        })
+        .catch(error => {
+          res.status(500).json(error);
+        });
+
+    }
+    else {
+        res.status(400).json({msg: 'please provide username and password - must be string'})
+    }
+
+    
+    }); 
+
 module.exports = router;
