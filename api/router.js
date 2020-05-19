@@ -1,7 +1,7 @@
 const bcryptjs = require('bcryptjs');
 const router = require("express").Router();
 const db = require("../data/db");
-const { isValid } = require('./services');
+const { isValid , restricted } = require('./services');
 
 router.post("/register", (req, res) => {
     const credentials = req.body;
@@ -15,8 +15,11 @@ router.post("/register", (req, res) => {
     db("users").insert(credentials)
     .then(id => {
         console.log(id);
+
         db("users").where({id: id[0] })
         .then(post => {
+            req.session.loggedIn = true;
+            req.session.user = post;
             res.status(201).json(post);
         })
         .catch(err => {
@@ -34,7 +37,7 @@ router.post("/register", (req, res) => {
 })     
 
 
-router.get("/users", (req, res) => {
+router.get("/users", restricted, (req, res) => {
     db("users")
     .then(data => {
         res.json(data);
@@ -52,6 +55,10 @@ router.post("/login", (req, res) => {
     .then(user => {
         console.log(user);
         if (user && bcryptjs.compareSync(password, user.password)) {
+
+            req.session.loggedIn = true;
+            req.session.user = user;
+
             res.status(200).json({ message: `Welcome ${user.username}!` });
           } else {
             res.status(401).json({ message: 'Invalid Credentials' });
@@ -68,5 +75,21 @@ router.post("/login", (req, res) => {
 
     
     }); 
+
+router.get('/logout', (req, res) => {
+    if (req.session) {
+        req.session.destroy(err => {
+            if (err){
+                res.status(500).json({msg: "could not log out"})
+            }
+            else {
+                res.status(204).end();
+            }
+        })
+    }
+    else {
+        res.status(204).end();
+    }
+})
 
 module.exports = router;

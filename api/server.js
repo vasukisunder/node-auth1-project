@@ -7,13 +7,13 @@ const server = express();
 const sessionConfig = {
     cookie: {
         maxAge: 1000 * 60 * 60,
-        secure: process.env.SECURE_COOKIE | false,
+        secure: process.env.SECURE_COOKIE || false,
         httpOnly: true
     },
     resave: false,
-    saveUninitialized: process.env.USER_ALLOWED_COOKIES | true,
+    saveUninitialized: process.env.USER_ALLOWED_COOKIES || true,
     name: "example name",
-    secret: process.env.COOKIE_SECRET | "secret!"
+    secret: process.env.COOKIE_SECRET || "secret!"
 }
 
 server.use(express.json());
